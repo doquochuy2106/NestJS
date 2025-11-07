@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { hashPasswordHelper } from '@/helpers/util';
 import apq from 'api-query-params'
 import { query } from 'express';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class UsersService {
@@ -79,11 +80,29 @@ export class UsersService {
     return `This action returns a #${id} user`;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async findByEmail(email: string) {
+    return await this.UserModel.findOne(
+      { email: email }
+    )
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async update(updateUserDto: UpdateUserDto) {
+
+    const updateUser = await this.UserModel.updateOne(
+      { _id: updateUserDto._id }, { ...updateUserDto }
+    )
+    return updateUser
+  }
+
+  async remove(_id: string) {
+    if (mongoose.isValidObjectId(_id)) {
+      //delete
+      return await this.UserModel.deleteOne(
+        { _id: _id }
+      )
+    }
+    else {
+      throw new BadRequestException("_id không đúng định dạng")
+    }
   }
 }
